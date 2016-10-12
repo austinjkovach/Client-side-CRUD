@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>TODO</title>
+  <link rel="stylesheet" type="text/css" href="/styles.css">
+</head>
+<body>
+
+  <input id="formInput" type="textarea" placeholder="Add item..." />
+  <button id="addBtn" onclick="submit()">Add</button>
+  <div id="container"></div>
+
+  <script>
+
+    var formInput = document.getElementById('formInput')
+    var xHttp = new XMLHttpRequest()
+    var url = "/api/v1/todos"
+
+    xHttp.onreadystatechange = function() {
+
+      if (this.status === 200 && this.readyState === 4) {
+
+        var data = JSON.parse(this.responseText)
+
+        generateRows(data)
+      }
+    }
+
+    xHttp.open("GET", url, true)
+    xHttp.send()
+
+  function submit() {
+    var xHttp = new XMLHttpRequest()
+    var url = "/api/v1/todos"
+
+    var textData = formInput.value
+    var $container = document.getElementById('container')
+
+    while($container.hasChildNodes()) {
+      $container.removeChild($container.lastChild)
+    }
+
+    xHttp.onreadystatechange = function() {
+
+      if (this.status === 200 && this.readyState === 4) {
+
+        var data = JSON.parse(this.responseText)
+
+        generateRows(data)
+      }
+    }
+
+    xHttp.open("POST", url, true)
+    xHttp.setRequestHeader("Content-type", "application/json");
+
+    var data = JSON.stringify({text: textData})
+
+    xHttp.send(data)
+    console.log('sending:', textData)
+    formInput.value = '';
+  }
+
+
+  function generateRows(data) {
+
+    var $container = document.getElementById('container')
+
+    for(var i=0;i<data.length;i++){
+
+      var div = document.createElement('div')
+      var $deleteButton = document.createElement('button')
+      var $editButton = document.createElement('button')
+
+      var index = data[i].id
+
+      div.innerText = data[i].text
+
+
+      $deleteButton.innerText = "delete"
+
+      $deleteButton.addEventListener('click', deleteTodo.bind(null, index))
+
+      div.appendChild($deleteButton)
+      $container.appendChild(div)
+    }
+  }
+
+  function deleteTodo(id) {
+    var xHttp = new XMLHttpRequest()
+    var url = "/api/v1/todos/" + id
+
+    $container = document.getElementById('container')
+    while($container.hasChildNodes()) {
+      $container.removeChild($container.lastChild)
+    }
+
+    xHttp.onreadystatechange = function() {
+
+      if (this.status === 200 && this.readyState === 4) {
+
+        var data = JSON.parse(this.responseText)
+
+        generateRows(data)
+      }
+    }
+
+    xHttp.open("DELETE", url, true)
+
+    xHttp.send()
+  }
+  </script>
+</body>
+</html>
